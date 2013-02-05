@@ -39,6 +39,12 @@
       this.$element.prepend(this.$hidden)
     }
 
+    this.$clear = this.$element.find('input[type=hidden][name="'+this.name+'-clear"]')
+    if (this.$clear.length === 0) {
+      this.$clear = $('<input type="hidden" />')
+      this.$element.prepend(this.$clear)
+    }
+
     this.$preview = this.$element.find('.fileupload-preview')
     var height = this.$preview.css('height')
     if (this.$preview.css('display') != 'inline' && height != '0px' && height != 'none') this.$preview.css('line-height', height)
@@ -49,7 +55,6 @@
       'hiddenVal': this.$hidden.val()
     }
 
-    this.$reset = this.$element.find('[data-reset="fileupload"]')
     this.$remove = this.$element.find('[data-dismiss="fileupload"]')
 
     this.$element.find('[data-trigger="fileupload"]').on('click.fileupload', $.proxy(this.trigger, this))
@@ -76,32 +81,33 @@
       }
       
       this.$hidden.val('')
+      this.$clear.val('')
       this.$hidden.attr('name', '')
+      this.$clear.attr('name', '')
       this.$input.attr('name', this.name)
 
       if (this.type === "image" && this.$preview.length > 0 && (typeof file.type !== "undefined" ? file.type.match('image.*') : file.name.match('\\.(gif|png|jpe?g)$')) && typeof FileReader !== "undefined") {
         var reader = new FileReader()
         var preview = this.$preview
         var element = this.$element
-        var reset = this.$reset
 
         reader.onload = function(e) {
           preview.html('<img src="' + e.target.result + '" ' + (preview.css('max-height') != 'none' ? 'style="max-height: ' + preview.css('max-height') + ';"' : '') + ' />')
           element.addClass('fileupload-exists').removeClass('fileupload-new')
-          reset.removeAttr("checked")
         }
 
         reader.readAsDataURL(file)
       } else {
         this.$preview.text(file.name)
         this.$element.addClass('fileupload-exists').removeClass('fileupload-new')
-        this.$reset.removeAttr("checked")
       }
     },
 
     clear: function(e) {
       this.$hidden.val('')
+      this.$clear.val('')
       this.$hidden.attr('name', this.name)
+      this.$clear.attr('name', this.name+'-clear')
       this.$input.attr('name', '')
 
       //ie8+ doesn't support changing the value of input with type=file so clone instead
@@ -116,7 +122,6 @@
 
       this.$preview.html('')
       this.$element.addClass('fileupload-new').removeClass('fileupload-exists')
-      this.$reset.attr("checked", "checked")
 
       if (e) {
         this.$input.trigger('change', [ 'clear' ])
